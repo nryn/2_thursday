@@ -6,10 +6,50 @@ describe Oystercard do
     expect(subject.balance).to eq(0)
   end
 
-  describe '#entry_station' do
-    it 'is not a thing, to begin with' do
-      expect(subject.entry_station).to be nil
+  it 'has an empty journey history to begin with' do
+    expect(subject.journeys).to be_empty
+  end
+
+  describe '#journeys' do
+    it 'holds an entry station when a journey has begun' do
+      subject.start_journey("Kings Cross")
+      expect(subject.journeys.last[:entry_station]).to eql "Kings Cross"
     end
+
+    it 'stores an exit station when a journey finished' do
+      subject.start_journey("Kings Cross")
+      subject.end_journey("Angel")
+      expect(subject.journeys.last[:exit_station]).to eql "Angel"
+    end
+
+  end
+
+  describe '#start_journey' do
+    it 'starts a journey' do
+      subject.top_up(5)
+      subject.start_journey("Kings Cross")
+      expect(subject.journeys.last[:entry_station]).to eql "Kings Cross"
+    end
+  end
+
+  describe '#end_journey' do
+    it 'ends a journey' do
+      subject.top_up(5)
+      subject.start_journey("Kings Cross")
+      subject.end_journey("Angel")
+      expect(subject.journeys.last[:exit_station]).to eql "Angel"
+    end
+
+    it 'deducts the minimum fare' do
+      subject.top_up(5)
+      subject.start_journey("Kings Cross")
+      expect {subject.end_journey("Angel")}.to change{subject.balance}.by -Oystercard::MINIMUM_FARE
+    end
+
+    it "knows when you didn't touch in" do
+
+    end
+
   end
 
   describe '#in_journey?' do
@@ -17,8 +57,8 @@ describe Oystercard do
       expect(subject.in_journey?).to be false
     end
 
-    it "can be in a journey, as long as there's an entry station" do
-      subject.entry_station = "King's Cross"
+    it "can be in a journey" do
+      subject.start_journey("Kings Cross")
       expect(subject.in_journey?).to be true
     end
 

@@ -9,7 +9,7 @@ describe Barrier do
 
   it "should raise an error is no station is entered" do
     expect { Barrier.new() }.to raise_error(ArgumentError)
-  end
+  endx
 
   describe '#touch_in' do
 
@@ -19,12 +19,12 @@ describe Barrier do
 
     it "starts the oystercard's journey" do
       barrier.touch_in(@card)
-      expect(@card.entry_station).to_not be_nil
+      expect(@card.journeys).to_not be_empty
     end
 
     it "remembers the entry station" do
       barrier.touch_in(@card)
-      expect(@card.entry_station).to eq barrier.station_name
+      expect(@card.journeys.last[:entry_station]).to eq barrier.station_name
     end
 
       context "when balance is below the minimum" do
@@ -39,20 +39,24 @@ describe Barrier do
   describe '#touch_out' do
 
     it "ends the oyster card's journey" do
-      @card.entry_station = "foo"
+      allow(@card).to receive(:balance).and_return 10
+      Barrier.new("Faraway Station").touch_in(@card)
       barrier.touch_out(@card)
-      expect(@card.entry_station).to be_nil
+      expect(@card.journeys.last[:exit_station]).to eql barrier.station_name
     end
 
     it "deducts some money from the oystercard balance" do
+      @card.top_up(10)
+      Barrier.new("Faraway Station").touch_in(@card)
       expect {barrier.touch_out(@card)}.to change{@card.balance}.by -Oystercard::MINIMUM_FARE
     end
 
-    it "forgets the entry station" do
+
+    it 'records the exit station' do
       allow(@card).to receive(:balance).and_return 10
       barrier.touch_in(@card)
       barrier.touch_out(@card)
-      expect(@card.entry_station).to be_nil
+      expect(@card.journeys.last[:exit_station]).to eql barrier.station_name
     end
   end
 end
