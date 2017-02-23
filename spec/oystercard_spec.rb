@@ -12,6 +12,18 @@ describe Oystercard do
     end
   end
 
+  describe '#in_journey?' do
+    it 'is initially not in a journey' do
+      expect(subject.in_journey?).to be false
+    end
+
+    it "can be in a journey, as long as there's an entry station" do
+      subject.entry_station = "King's Cross"
+      expect(subject.in_journey?).to be true
+    end
+
+  end
+
   describe '#top_up' do
 
     it 'can top up oystercard with set amount' do
