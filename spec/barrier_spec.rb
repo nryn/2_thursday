@@ -9,7 +9,7 @@ describe Barrier do
 
   it "should raise an error is no station is entered" do
     expect { Barrier.new() }.to raise_error(ArgumentError)
-  endx
+  end
 
   describe '#touch_in' do
 
